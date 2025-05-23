@@ -1,14 +1,15 @@
-<script setup>
-import { ref, computed } from "vue";
+<script setup lang="ts">
+import { ref, computed, type ComputedRef } from "vue";
 import socksGreenImage from "../assets/images/socks_green.jpeg";
 import socksBlueImage from "../assets/images/socks_blue.jpeg";
 import ProductDetails from "./productDetails.vue";
-const props = defineProps({
-	premium: {
-		type: Boolean,
-		required: true,
-	},
-});
+
+const props = defineProps<{
+	premium: boolean;
+	hasProductInCart: ComputedRef<boolean>;
+}>();
+
+const emit = defineEmits(["add-to-cart", "remove-from-cart"]);
 
 const product = ref("Socks");
 
@@ -35,7 +36,7 @@ const variants = ref([
 		id: 2235,
 		color: "blue",
 		image: socksBlueImage,
-		quantity: 0,
+		quantity: 10,
 		onSale: false,
 	},
 ]);
@@ -57,7 +58,11 @@ const onSale = computed(() => {
 });
 
 const addToCard = () => {
-	cart.value += 1;
+	emit("add-to-cart", variants.value[selectedVariant.value].id);
+};
+
+const removeFromCard = () => {
+	emit("remove-from-cart", variants.value[selectedVariant.value].id);
 };
 
 const updateVariant = (index) => {
@@ -87,7 +92,13 @@ const updateVariant = (index) => {
           :style="{ backgroundColor: variant.color}"
           >
           </div>
-          <button :disabled="!inStock" class="button" :class="{disabledButton: !inStock}" v-on:click="addToCard">Add to Card</button>
+          <button :disabled="!inStock" 
+          class="button" 
+          :class="{disabledButton: !inStock}" 
+          v-on:click="addToCard">Add to Card</button>
+          <button  class="button" v-if="hasProductInCart" @click="removeFromCard">
+            Remove 
+        </button>
       </div>
     </div>
   </div>
